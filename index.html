@@ -1,27 +1,48 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Карта Сумської області</title>
   <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet/dist/leaflet.css"
+  />
   <style>
-    #map { height: 100vh; margin: 0; padding: 0; }
+    /* Повна висота карти */
+    #map {
+      height: 100vh;
+      margin: 0;
+      padding: 0;
+    }
+    /* Стилізація портретних іконок */
+    .portrait-icon {
+      border: 3px solid #fff;
+      border-radius: 50%;
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
+      /* Для запобігання розмиття на краях */
+      image-rendering: crisp-edges;
+    }
   </style>
 </head>
 <body>
   <div id="map"></div>
+
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
     // Ініціалізація карти
     const map = L.map('map').setView([50.9, 34.8], 8);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
+    L.tileLayer(
+      'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      {
+        attribution: '&copy; OpenStreetMap contributors'
+      }
+    ).addTo(map);
 
     // Дані: літературні місця
+
     const literaryPlaces = [
       { name: 'Пантелеймон Куліш', place: 'Вороніж', coords: [51.767687, 33.4643645], portraitUrl: 'https://upload.wikimedia.org/wikipedia/commons/1/17/Panteleimon_Kulish.jpg' },
       { name: 'Яків Щоголев', place: 'Охтирка', coords: [50.2819, 34.8990], portraitUrl: 'https://upload.wikimedia.org/wikipedia/commons/2/2f/%D0%AF%D0%BA%D1%96%D0%B2_%D0%A9%D0%BE%D0%B3%D0%BE%D0%BB%D1%96%D0%B2.jpg', videoUrl: 'https://drive.google.com/file/d/1p--yXddc0CNQZbBexvAcOsmt4Oh3XLe7/preview' },
@@ -37,27 +58,48 @@
       { name: 'Микола Хвильовий', place: 'Тростянець', coords: [50.48, 34.970], portraitUrl: 'https://nlu.org.ua/storage/tinymce_pic/2023121312061923.jpg', videoUrl: 'https://drive.google.com/file/d/1qvHp3nzduKToQDOhwLgdyQ7OM-8b3tS6/preview' }
     ];
 
+
     // Додавання маркерів
     literaryPlaces.forEach(item => {
+      // Створюємо кастомну іконку з CSS-класом
       const icon = L.icon({
         iconUrl: item.portraitUrl,
-        iconSize: [70, 70],
-        iconAnchor: [35, 70],
-        popupAnchor: [0, -70]
+        iconSize: [60, 60],      // трохи менший розмір, але більш помітний
+        iconAnchor: [30, 60],    // центр по горизонталі, низ по вертикалі
+        popupAnchor: [0, -60],   // попап над іконкою
+        className: 'portrait-icon'
       });
+
       const marker = L.marker(item.coords, { icon }).addTo(map);
-      // Tooltip (назва)
-      marker.bindTooltip(item.name, { direction: 'top', offset: [0, -10] });
-      // Попап: якщо є відео - відображаємо iframe, інакше просто ім'я
+      // Tooltip з ім'ям на hover
+      marker.bindTooltip(item.name, {
+        direction: 'top',
+        offset: [0, -10],
+        permanent: false
+      });
+
+      // Попап чи відео
       if (item.videoUrl) {
-        const content = `<div><iframe src="${item.videoUrl}" width="320" height="240" allow="autoplay; encrypted-media" allowfullscreen></iframe></div>`;
+        const content = `<iframe src="${item.videoUrl}" width="320" height="240" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
         marker.bindPopup(content, { maxWidth: 360 });
-        marker.on('click', () => marker.openPopup());
       } else {
         marker.bindPopup(`<b>${item.name}</b><br>${item.place}`);
-        marker.on('click', () => marker.openPopup());
       }
+
+      // Відкриваємо попап щоразу при кліку
+      marker.on('click', () => marker.openPopup());
+    });
+
+    // Оптимізація: при зміні зуму можна коригувати розмір іконок
+    map.on('zoomend', () => {
+      const currentZoom = map.getZoom();
+      const scale = currentZoom / 8;  // зміна масштабу в залежності від рівня зуму
+      document.querySelectorAll('img.portrait-icon').forEach(img => {
+        img.style.width = `${Math.round(60 * scale)}px`;
+        img.style.height = `${Math.round(60 * scale)}px`;
+      });
     });
   </script>
 </body>
 </html>
+
