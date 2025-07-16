@@ -3,86 +3,31 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Карта Сумської області</title>
+  <title>Літературна Сумщина</title>
   <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet/dist/leaflet.css"
   />
-  <style>
-    #map {
-      height: 100vh;
-      margin: 0;
-      padding: 0;
-    }
-    .portrait-icon {
-      border: 3px solid #fff;
-      border-radius: 50%;
-      box-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
-      image-rendering: crisp-edges;
-    }
-  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div id="map"></div>
+  <div class="header">
+    <h1><i class="fas fa-book-open"></i> Літературна Сумщина</h1>
+    <p class="subtitle">Відкрийте для себе спадщину видатних письменників та поетів Сумської області. Клацайте на маркери на мапі або обирайте авторів зі списку.</p>
+  </div>
+  
+  <div id="map-container">
+    <div id="map"></div>
+    <div id="sidebar">
+      <div class="search-container">
+        <input type="text" id="search" placeholder="Пошук письменників...">
+      </div>
+      <div class="author-list" id="author-list"></div>
+    </div>
+  </div>
+  
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-  <script>
-    const map = L.map('map').setView([50.9, 34.8], 8);
-    L.tileLayer(
-      'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-      {
-        attribution: '&copy; OpenStreetMap contributors'
-      }
-    ).addTo(map);
-
-    const literaryPlaces = [
-      { name: 'Пантелеймон Куліш', place: 'Вороніж', coords: [51.767687, 33.4643645], portraitUrl: 'https://upload.wikimedia.org/wikipedia/commons/1/17/Panteleimon_Kulish.jpg' },
-      { name: 'Яків Щоголев', place: 'Охтирка', coords: [50.2819, 34.8990], portraitUrl: 'https://upload.wikimedia.org/wikipedia/commons/2/2f/%D0%AF%D0%BA%D1%96%D0%B2_%D0%A9%D0%BE%D0%B3%D0%BE%D0%BB%D1%96%D0%B2.jpg', videoUrl: 'https://drive.google.com/file/d/1p--yXddc0CNQZbBexvAcOsmt4Oh3XLe7/preview' },
-      { name: 'Іван Багряний', place: 'Охтирка', coords: [50.3220, 34.8750], portraitUrl: 'https://folio.com.ua/system/artists/photos/000/000/194/large/31bagryaniy2.jpg?1673624296' },
-      { name: 'Павло Грабовський', place: 'с. Грабовське', coords: [50.7001265, 35.4510695], portraitUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e2/%D0%9F%D0%B0%D0%B2%D0%BB%D0%BE_%D0%93%D1%80%D0%B0%D0%B1%D0%BE%D0%B2%D1%81%D1%8C%D0%BA%D0%B8%D0%B9_2.jpg/640px-%D0%9F%D0%B0%D0%B2%D0%BB%D0%BE_%D0%93%D1%80%D0%B0%D0%B1%D0%BE%D0%B2%D1%81%D1%8C%D0%BA%D0%B8%D0%B9_2.jpg' },
-      { name: 'Олександр Олесь', place: 'Білопілля', coords: [51.14611, 34.30528], portraitUrl: 'https://diaspora.com.ua/wp-content/uploads/2023/09/oleksandr_oles_uvan_archive.jpg' },
-      { name: 'Пилип Капельгородський', place: 'с. Городище', coords: [50.92815, 34.00852], portraitUrl: 'https://upload.wikimedia.org/wikipedia/commons/7/79/%D0%9A%D0%B0%D0%BF%D0%B5%D0%BB%D1%8C%D0%B3%D0%BE%D1%80%D0%BE%D0%B4%D1%81%D1%8C%D0%BA%D0%B8%D0%B9_%D0%9F.jpg', videoUrl: 'https://drive.google.com/file/d/1WSdtccG7EDNkhqOB2V6h2SAgy5VRBeWj/preview' },
-      { name: 'Борис Антоненко-Давидович', place: 'Ромни', coords: [50.7354, 33.4808], portraitUrl: 'https://uinp.gov.ua/storage/app/public/uploads/2019-08-05/13/jdK1564999491yPt.jpeg' },
-      { name: 'Панас Кочура', place: 'Кролевець', coords: [51.5529, 33.3825], portraitUrl: 'https://upload.wikimedia.org/wikipedia/uk/a/a9/%D0%91%D0%B5%D1%80%D0%BA%D1%96%D0%B2%D1%86%D1%96_016.jpg' },
-      { name: 'Павло Ключина', place: 'с. Великий Самбір', coords: [51.05722, 33.13611], portraitUrl: 'https://day.kyiv.ua/sites/default/files/main/articles/11092014/13klychina.jpg' },
-      { name: 'Дмитро Білоус', place: 'с. Курмани', coords: [50.83028, 33.78750], portraitUrl: 'https://esu.com.ua/images/article_images/B/Bilous%20Dmitro%20Grigorovich.jpg' },
-      { name: 'Остап Вишня', place: 'с. Грунь', coords: [50.23778, 34.60250], portraitUrl: 'https://knu.ua/tpl/img/photo-osobystosti/foto-vyshnja.jpg' },
-      { name: 'Микола Хвильовий', place: 'Тростянець', coords: [50.48, 34.970], portraitUrl: 'https://nlu.org.ua/storage/tinymce_pic/2023121312061923.jpg', videoUrl: 'https://drive.google.com/file/d/1qvHp3nzduKToQDOhwLgdyQ7OM-8b3tS6/preview' }
-    ];
-
-    literaryPlaces.forEach(item => {
-      const icon = L.icon({
-        iconUrl: item.portraitUrl,
-        iconSize: [60, 60],
-        iconAnchor: [30, 60],
-        popupAnchor: [0, -60],
-        className: 'portrait-icon'
-      });
-
-      const marker = L.marker(item.coords, { icon }).addTo(map);
-      marker.bindTooltip(item.name, {
-        direction: 'top',
-        offset: [0, -10],
-        permanent: false
-      });
-
-      if (item.videoUrl) {
-        const content = `<iframe src="${item.videoUrl}" width="320" height="240" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
-        marker.bindPopup(content, { maxWidth: 360 });
-      } else {
-        marker.bindPopup(`<b>${item.name}</b><br>${item.place}`);
-      }
-
-      marker.on('click', () => marker.openPopup());
-    });
-
-    map.on('zoomend', () => {
-      const currentZoom = map.getZoom();
-      const scale = currentZoom / 8;
-      document.querySelectorAll('img.portrait-icon').forEach(img => {
-        img.style.width = `${Math.round(60 * scale)}px`;
-        img.style.height = `${Math.round(60 * scale)}px`;
-      });
-    });
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
